@@ -11,3 +11,6 @@ __pycache__/
 
 # Vim swap file
 *.swp
+
+# Mac bs
+.DS_Store
