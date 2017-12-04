@@ -77,7 +77,7 @@ def main():
             c = review['cool']
             total_compliments = u + f + c
             max_class = max(u, f, c)
-            if total_compliments < args.threshold or max_class/total_compliments <= args.ratio:  # Filter out reviews
+            if total_compliments < args.threshold or max_class/total_compliments < args.ratio:  # Filter out reviews
                 continue
             json.dump(review, cleaned_file)
             cleaned_file.write('\n')
