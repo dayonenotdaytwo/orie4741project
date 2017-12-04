@@ -6,7 +6,23 @@ import json
 import argparse
 import os
 
-from time import time
+from operator import itemgetter
+from data_processing.utils import apply_over_generator
+from functools import partial
+
+
+def review_parse(ratio, threshold, cleaned_file, review, acc):
+    u = review['useful']
+    f = review['funny']
+    c = review['cool']
+    total_compliments = u + f + c
+    index, value = max(enumerate((u, f, c)), key=itemgetter(1))  # argmax with value, key
+    if total_compliments < threshold or value / total_compliments < ratio:  # Filter out reviews
+        return acc
+    review['max_compliment_type'] = ('useful', 'funny', 'cool')[index]
+    json.dump(review, cleaned_file)
+    cleaned_file.write('\n')
+    return acc+1
 
 
 def main():
@@ -61,37 +77,17 @@ def main():
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-    with open(args.dirty_path, 'r') as dirty_file, open(args.clean_path, 'w+') as cleaned_file:
+    with open(args.dirty_path, 'r') as dirty_file, open(args.clean_path, 'x+') as cleaned_file:
         print("Beginning Filtering!")
         num_reviews = sum(1 for _ in dirty_file)
         print("There are %d reviews." % num_reviews)
         dirty_file.seek(0)  # Reset stream position to start
         reviews = (json.loads(line) for line in dirty_file)
-        last_time = time()
-        last_i = 0
-        filtered_count = 0
-        for i, review in enumerate(reviews):
-            # ufc is a mma championship lol
-            u = review['useful']
-            f = review['funny']
-            c = review['cool']
-            total_compliments = u + f + c
-            max_class = max(u, f, c)
-            if total_compliments < args.threshold or max_class/total_compliments < args.ratio:  # Filter out reviews
-                continue
-            json.dump(review, cleaned_file)
-            cleaned_file.write('\n')
-            filtered_count += 1
 
-            current_time = time()
-            delta = current_time - last_time
-            if delta >= args.progress_interval:
-                average_speed = (i - last_i) / delta
-                est_time_remaining = (num_reviews - i) / average_speed
-                last_i = i
-                last_time = current_time
-                print("Percent Complete: %7.4f, Est. Minutes Remaining: %6.1f" %
-                      (i / num_reviews * 100, est_time_remaining / 60))
+        fn = partial(review_parse, args.ratio, args.threshold, cleaned_file)
+        filtered_count = 0
+        filtered_count = apply_over_generator(reviews, fn, acc=filtered_count, num_elements=num_reviews)
+
         # Count remaining reviews
         cleaned_file.seek(0)
         num_reviews = sum(1 for _ in cleaned_file)

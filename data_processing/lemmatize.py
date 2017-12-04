@@ -10,7 +10,8 @@ from nltk import pos_tag
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords, wordnet
 from nltk.stem.wordnet import WordNetLemmatizer
-from time import time
+from data_processing.utils import apply_over_generator
+from functools import partial
 
 
 def get_wordnet_pos(treebank_tag):
@@ -71,11 +72,19 @@ def remove_stopwords(review):
 remove_stopwords.s_words = set(stopwords.words('english'))
 
 
-def clean_review(review):
-    """Cleans a review by tokenizing it, lemmatizing it, and removing stopwords and non alpha-numeric characters."""
+def clean_review_text(review):
+    """Cleans a review string by tokenizing it, lemmatizing it, and removing stopwords and non alpha-numeric chars."""
     tokens = generate_tokens(review)
     lemmatized = lemmatize_tokens(tokens)
     return remove_stopwords(lemmatized)
+
+
+def clean_json(cleaned_file, the_json, acc):
+    cleaned_text = clean_review_text(the_json['text'])
+    the_json['text'] = cleaned_text
+    json.dump(the_json, cleaned_file)
+    cleaned_file.write('\n')
+    return acc+1
 
 
 def main():
@@ -102,28 +111,21 @@ def main():
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-    with open(args.dirty_path, 'r') as dirty_file, open(args.clean_path, 'w+') as cleaned_file:
+    with open(args.dirty_path, 'r') as dirty_file, open(args.clean_path, 'x+') as cleaned_file:
         print("Beginning Cleaning!")
         num_reviews = sum(1 for line in dirty_file)
         print("There are %d reviews." % num_reviews)
         dirty_file.seek(0)  # Reset stream position to start
         reviews = (json.loads(line) for line in dirty_file)
-        last_time = time()
-        last_i = 0
-        for i, review in enumerate(reviews):
-            cleaned_text = clean_review(review['text'])
-            review['text'] = cleaned_text
-            json.dump(review, cleaned_file)
-            cleaned_file.write('\n')
+        fn = partial(clean_json, cleaned_file)
+        filtered_count = 0
+        filtered_count = apply_over_generator(reviews, fn, filtered_count, num_reviews)
 
-            current_time = time()
-            delta = current_time - last_time
-            if delta >= args.progress_interval:
-                average_speed = (i - last_i) / delta
-                est_time_remaining = (num_reviews-i) / average_speed
-                last_i = i
-                last_time = current_time
-                print("Percent Complete: %7.4f, Est. Minutes Remaining: %6.1f" % (i/num_reviews * 100, est_time_remaining/60))
+        if filtered_count != num_reviews:
+            print(("ERROR! The filtered review count was %d but the number of reviews in the file is %d. " +
+                  "They should match! Something went wrong.") % (filtered_count, num_reviews))
+            return -1
+        print("Lemmatization complete!")
 
 
 if __name__ == "__main__":
