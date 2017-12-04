@@ -7,7 +7,7 @@ import numpy as np
 import os
 import math
 
-from dl_style_transfer.layers.layers import *
+from Layers.layers import *
 from time import time, strftime
 
 
