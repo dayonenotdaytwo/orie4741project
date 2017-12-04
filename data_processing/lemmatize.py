@@ -1,8 +1,16 @@
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+
 import json
+import os
+import sys
+
 from nltk import pos_tag
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords, wordnet
 from nltk.stem.wordnet import WordNetLemmatizer
+from time import time
 
 
 def get_wordnet_pos(treebank_tag):
@@ -70,9 +78,40 @@ def clean_review(review):
     return remove_stopwords(lemmatized)
 
 
-with open('data/review.json', 'r') as f:
-    reviews = (json.loads(line) for line in f)
-    lemmatized = (clean_review(review['text']) for review in reviews)
-    print(next(lemmatized))
+def main():
+    num_args = len(sys.argv)
+    if num_args <= 1:
+        raise ValueError("Need to specify the path to save the file at!")
+    save_path = sys.argv[1]
+    if not os.path.exists(os.path.dirname(save_path)):
+        os.makedirs(os.path.dirname(save_path))
+
+    if num_args is 3:
+        progress_interval = int(sys.argv[2])
+    else:
+        progress_interval = 10  # Progress printing interval in seconds.
+
+    with open('data/review.json', 'r') as dirty_file, open('processed/review.json', 'w+') as cleaned_file:
+        print("Beginning Cleaning!")
+        num_reviews = sum(1 for line in dirty_file)
+        print("There are %d reviews." % num_reviews)
+        dirty_file.seek(0)  # Reset stream position to start
+        reviews = (json.loads(line) for line in dirty_file)
+        last_time = time()
+        last_i = 0
+        for i, review in enumerate(reviews):
+            cleaned_text = clean_review(review['text'])
+            review['text'] = cleaned_text
+            json.dump(review, cleaned_file)
+            current_time = time()
+            delta = current_time - last_time
+            if delta >= progress_interval:
+                average_speed = (i - last_i) / delta
+                est_time_remaining = (num_reviews-i) / average_speed
+                last_i = i
+                last_time = current_time
+                print("Percent Complete: %6f  Est. Minutes Remaining: %6f" % (i/num_reviews * 100, est_time_remaining/60))
 
 
+if __name__ == "__main__":
+    main()
