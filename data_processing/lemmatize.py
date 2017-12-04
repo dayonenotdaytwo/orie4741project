@@ -4,7 +4,6 @@ from __future__ import absolute_import
 
 import json
 import os
-import sys
 import argparse
 
 from nltk import pos_tag
@@ -115,6 +114,8 @@ def main():
             cleaned_text = clean_review(review['text'])
             review['text'] = cleaned_text
             json.dump(review, cleaned_file)
+            cleaned_file.write('\n')
+
             current_time = time()
             delta = current_time - last_time
             if delta >= args.progress_interval:
