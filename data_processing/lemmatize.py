@@ -5,6 +5,7 @@ from __future__ import absolute_import
 import json
 import os
 import sys
+import argparse
 
 from nltk import pos_tag
 from nltk.tokenize import word_tokenize, sent_tokenize
@@ -79,19 +80,30 @@ def clean_review(review):
 
 
 def main():
-    num_args = len(sys.argv)
-    if num_args <= 1:
-        raise ValueError("Need to specify the path to save the file at!")
-    save_path = sys.argv[1]
-    if not os.path.exists(os.path.dirname(save_path)):
-        os.makedirs(os.path.dirname(save_path))
+    parser = argparse.ArgumentParser(
+        description="Cleans the reviews by tokenizing, lemmatizing, " +
+        "removing stopwords and non alpha-numeric characters.")
+    parser.add_argument(
+        'dirty_path',
+        help="The location of the \"dirty\" json file to clean",
+        type=str)
+    parser.add_argument(
+        'clean_path',
+        help="The location to save the cleaned json file to",
+        type=str)
+    parser.add_argument(
+        '--progress_interval',
+        metavar='secs',
+        help="The progress printing interval in seconds",
+        type=int,
+        default=5)
+    args = parser.parse_args()
 
-    if num_args is 3:
-        progress_interval = int(sys.argv[2])
-    else:
-        progress_interval = 10  # Progress printing interval in seconds.
+    directory = os.path.dirname(args.clean_path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
-    with open('data/review.json', 'r') as dirty_file, open('processed/review.json', 'w+') as cleaned_file:
+    with open(args.dirty_path, 'r') as dirty_file, open(args.clean_path, 'w+') as cleaned_file:
         print("Beginning Cleaning!")
         num_reviews = sum(1 for line in dirty_file)
         print("There are %d reviews." % num_reviews)
@@ -105,7 +117,7 @@ def main():
             json.dump(review, cleaned_file)
             current_time = time()
             delta = current_time - last_time
-            if delta >= progress_interval:
+            if delta >= args.progress_interval:
                 average_speed = (i - last_i) / delta
                 est_time_remaining = (num_reviews-i) / average_speed
                 last_i = i
