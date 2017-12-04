@@ -110,7 +110,7 @@ def main():
                 est_time_remaining = (num_reviews-i) / average_speed
                 last_i = i
                 last_time = current_time
-                print("Percent Complete: %6f  Est. Minutes Remaining: %6f" % (i/num_reviews * 100, est_time_remaining/60))
+                print("Percent Complete: %7.4f, Est. Minutes Remaining: %6.1f" % (i/num_reviews * 100, est_time_remaining/60))
 
 
 if __name__ == "__main__":
