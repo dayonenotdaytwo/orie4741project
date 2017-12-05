@@ -2,12 +2,12 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 
+import sys
+import os.path as p
+sys.path.append(p.abspath(p.dirname(__file__) + '/../'))
+
 import json
 import os
-import argparse
-import sys
-
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from nltk import pos_tag
 from nltk.tokenize import word_tokenize, sent_tokenize

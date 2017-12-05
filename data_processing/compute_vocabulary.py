@@ -2,12 +2,12 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 
+import sys
+import os.path as p
+sys.path.append(p.abspath(p.dirname(__file__) + '/../'))
+
 import json
 import argparse
-import os
-import sys
-
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from data_processing.utils import apply_over_generator
 
