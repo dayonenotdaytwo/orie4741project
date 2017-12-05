@@ -70,7 +70,7 @@ def main():
         vocab_list = list(key for key, _ in vocab_dict.items())
         print("There are %d words in the vocabulary." % num_words)
 
-        dtm = np.zeros((num_reviews, args.top_n_words+3), dtype=np.int32)  # Add 3 for labels
+        dtm = np.zeros((num_reviews, args.top_n_words+1), dtype=np.int32)  # Add 3 for labels
         #dtm = np.memmap(args.dtm_path, dtype=np.int16, mode='w+', shape=(num_reviews, num_words))
 
         review_file.seek(0)  # Reset stream position to start
