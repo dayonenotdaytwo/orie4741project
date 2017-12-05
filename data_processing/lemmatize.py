@@ -2,12 +2,12 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 
+import sys
+import os
+sys.path.insert(0, os.path.abspath(__file__ + "/../../"))
+
 import json
 import os
-import argparse
-import sys
-
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from nltk import pos_tag
 from nltk.tokenize import word_tokenize, sent_tokenize
@@ -115,7 +115,7 @@ def main():
         os.makedirs(directory)
 
     with open(args.dirty_path, 'r') as dirty_file, open(args.clean_path, 'x+') as cleaned_file:
-        print("Beginning Cleaning!")
+        print("Beginning cleaning!")
         num_reviews = sum(1 for _ in dirty_file)
         print("There are %d reviews." % num_reviews)
         dirty_file.seek(0)  # Reset stream position to start

@@ -2,12 +2,12 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 
+import sys
+import os
+sys.path.insert(0, os.path.abspath(__file__ + "/../../"))
+
 import json
 import argparse
-import os
-import sys
-
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from operator import itemgetter
 from functools import partial
@@ -48,7 +48,7 @@ def main():
         default=5)
     parser.add_argument(
         '--threshold',
-        metavar='secs',
+        metavar='n',
         help="The minimum number of compliments received",
         type=restricted_int,
         default=10)
@@ -65,7 +65,7 @@ def main():
         os.makedirs(directory)
 
     with open(args.dirty_path, 'r') as dirty_file, open(args.clean_path, 'x+') as cleaned_file:
-        print("Beginning Filtering!")
+        print("Beginning filtering!")
         num_reviews = sum(1 for _ in dirty_file)
         print("There are %d reviews." % num_reviews)
         dirty_file.seek(0)  # Reset stream position to start
@@ -83,7 +83,7 @@ def main():
                   "They should match! Something went wrong.") % (filtered_count, num_reviews))
             return -1
         print("After filtering, there are %d reviews." % num_reviews)
-        print("Filtering Complete!")
+        print("Filtering complete!")
 
 
 if __name__ == '__main__':
