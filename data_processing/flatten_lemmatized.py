@@ -1,0 +1,77 @@
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+
+import json
+import argparse
+import os
+
+from operator import itemgetter
+from data_processing.utils import apply_over_generator
+from functools import partial
+
+
+def main():
+    def restricted_int(x):
+        x = int(x)
+        if x<1:
+            raise argparse.ArgumentTypeError("%r not in range [1,inf)" % (x,))
+        return x
+
+    parser = argparse.ArgumentParser(
+        description="Flattens the nested text lists in a json file.")
+    parser.add_argument(
+        'nested_path',
+        help="The location of the nested json file to clean",
+        type=str)
+    parser.add_argument(
+        'flattened_path',
+        help="The location to save the flattened json file to",
+        type=str)
+    parser.add_argument(
+        '--progress_interval',
+        metavar='secs',
+        help="The progress printing interval in seconds",
+        type=restricted_int,
+        default=5)
+    args = parser.parse_args()
+
+    directory = os.path.dirname(args.clean_path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    def flatten(review, acc):
+        lists = review['text']
+        flattened = []
+        for sentence in lists:
+            flattened += sentence
+        review['text'] = flattened
+        json.dump(review, cleaned_file)
+        cleaned_file.write('\n')
+        return acc + 1
+
+    with open(args.dirty_path, 'r') as dirty_file, open(args.clean_path, 'x+') as cleaned_file:
+        print("Beginning Filtering!")
+        num_reviews = sum(1 for _ in dirty_file)
+        print("There are %d reviews." % num_reviews)
+        dirty_file.seek(0)  # Reset stream position to start
+        reviews = (json.loads(line) for line in dirty_file)
+
+        fn = flatten
+        filtered_count = 0
+        filtered_count = apply_over_generator(
+            reviews, fn, acc=filtered_count, num_elements=num_reviews, progress_interval=args.progress_interval)
+
+        # Count remaining reviews
+        cleaned_file.seek(0)
+        num_reviews = sum(1 for _ in cleaned_file)
+        if filtered_count != num_reviews:
+            print(("ERROR! The filtered review count was %d but the number of reviews in the file is %d. " +
+                  "They should match! Something went wrong.") % (filtered_count, num_reviews))
+            return -1
+        print("After filtering, there are %d reviews." % num_reviews)
+        print("Filtering Complete!")
+
+
+if __name__ == '__main__':
+    main()
