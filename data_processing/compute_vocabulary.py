@@ -8,30 +8,33 @@ sys.path.insert(0, os.path.abspath(__file__ + "/../../"))
 
 import json
 import argparse
+import pickle
 
-from data_processing.utils import apply_over_generator
+from data_processing.utils import *
+from collections import defaultdict, OrderedDict
 
 
 def count_vocab(review, acc):
     text = review['text']
+    for sentence in text:
+        for word in sentence:
+            if word.isnumeric():
+                acc[NUMERICAL_TOKEN] += 1
+            else:
+                acc[word] += 1
+    return acc
 
 
 def main():
-    def restricted_int(x):
-        x = int(x)
-        if x<1:
-            raise argparse.ArgumentTypeError("%r not in range [1,inf)" % (x,))
-        return x
-
     parser = argparse.ArgumentParser(
         description="Constructs a vocabulary and associated frequency count from the tokenized reviews.")
     parser.add_argument(
         'review_path',
-        help="The location of json file of reviews to clean",
+        help="The location of json file of reviews to count words in",
         type=str)
     parser.add_argument(
-        'vocab_path',
-        help="The location to save the vocabulary to",
+        'vocab_pickle',
+        help="The location to save the pickled vocabulary to",
         type=str)
     parser.add_argument(
         '--progress_interval',
@@ -41,37 +44,43 @@ def main():
         default=5)
     parser.add_argument(
         '--threshold',
-        metavar='secs',
+        metavar='n',
         help="The minimum number of times a word can occur without getting mapped to the <UNKNOWN> token",
         type=restricted_int,
         default=10)
     args = parser.parse_args()
 
-    directory = os.path.dirname(args.clean_path)
+    directory = os.path.dirname(args.vocab_pickle)
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-    with open(args.review_path, 'r') as review_file, open(args.vocab_path, 'x+') as vocab_file:
-        print("Beginning Filtering!")
+    with open(args.review_path, 'r') as review_file, open(args.vocab_pickle, 'xb+') as vocab_pickle:
+        print("Beginning vocab count!")
         num_reviews = sum(1 for _ in review_file)
         print("There are %d reviews." % num_reviews)
         review_file.seek(0)  # Reset stream position to start
         reviews = (json.loads(line) for line in review_file)
 
-        num_counted = 0
-        vocab_dict = {}
-        acc = (num_counted, vocab_dict)
-        filtered_count = apply_over_generator(
-            reviews, count_vocab, acc=acc, num_elements=num_reviews, progress_interval=args.progress_interval)
+        vocab_dict = defaultdict(int)
+        vocab_dict = apply_over_generator(
+            reviews, count_vocab, acc=vocab_dict, num_elements=num_reviews, progress_interval=args.progress_interval)
 
-        vocab_file.seek(0)
-        num_reviews = sum(1 for _ in vocab_file)
-        if filtered_count != num_reviews:
-            print(("ERROR! The filtered review count was %d but the number of reviews in the file is %d. " +
-                  "They should match! Something went wrong.") % (filtered_count, num_reviews))
-            return -1
-        print("After filtering, there are %d reviews." % num_reviews)
-        print("Filtering Complete!")
+        word_count = 0
+        removed_count = 0
+        freq_dict = {}
+        for word, freq in vocab_dict.items():
+            if freq < args.threshold:
+                removed_count += 1
+            else:
+                word_count += 1
+                freq_dict[word] = freq
+        freq_dict[UNKOWN_TOKEN] = removed_count
+        # Highest to lowest frequency
+        sorted_dict = OrderedDict(sorted(freq_dict.items(), key=lambda kv: (kv[1], kv[0]), reverse=True))
+        pickle.dump(sorted_dict, vocab_pickle)
+        print(sorted_dict)
+        print("There are %d words (not including %s), after removing %d." % (word_count, UNKOWN_TOKEN, removed_count))
+        print("Counting complete!")
 
 
 if __name__ == '__main__':

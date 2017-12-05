@@ -54,7 +54,7 @@ def main():
         return acc + 1
 
     with open(nested_path, 'r') as nested_file, open(flattened_path, 'x+') as flattened_file:
-        print("Beginning Filtering!")
+        print("Beginning filtering!")
         num_reviews = sum(1 for _ in nested_file)
         print("There are %d reviews." % num_reviews)
         nested_file.seek(0)  # Reset stream position to start
@@ -73,7 +73,7 @@ def main():
                   "They should match! Something went wrong.") % (filtered_count, num_reviews))
             return -1
         print("After filtering, there are %d reviews." % num_reviews)
-        print("Filtering Complete!")
+        print("Filtering complete!")
 
 
 if __name__ == '__main__':

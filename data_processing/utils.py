@@ -6,6 +6,10 @@ import argparse
 from time import time
 
 
+UNKOWN_TOKEN = '<UNKNOWN>'
+NUMERICAL_TOKEN = '<NUMBER>'
+
+
 def apply_over_generator(iterable, fn, acc=None, num_elements=None, progress_interval=5, start_stop_info=True):
     """Apply a function to the contents of an iterable. Can also print progress of application.
 
@@ -58,3 +62,4 @@ def restricted_int(x):
     if x<1:
         raise argparse.ArgumentTypeError("%r not in range [1,inf)" % (x,))
     return x
+
