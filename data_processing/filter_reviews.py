@@ -20,7 +20,7 @@ def review_parse(ratio, threshold, cleaned_file, review, acc):
     c = review['cool']
     total_compliments = u + f + c
     index, value = max(enumerate((u, f, c)), key=itemgetter(1))  # argmax with value, key
-    if total_compliments < threshold or value / total_compliments < ratio:  # Filter out reviews
+    if total_compliments <= threshold or value / total_compliments <= ratio:  # Filter out reviews
         return acc
     review['max_compliment_type'] = ('useful', 'funny', 'cool')[index]
     json.dump(review, cleaned_file)
@@ -57,7 +57,7 @@ def main():
         metavar='r',
         help="The minimum ratio of the highest compliment category to the total number of compliments",
         type=restricted_float,
-        default=0.4)
+        default=0.5)
     args = parser.parse_args()
 
     directory = os.path.dirname(args.clean_path)

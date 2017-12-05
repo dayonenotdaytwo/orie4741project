@@ -7,7 +7,7 @@ import os
 sys.path.insert(0, os.path.abspath(__file__ + "/../../"))
 
 import json
-import os
+import argparse
 
 from nltk import pos_tag
 from nltk.tokenize import word_tokenize, sent_tokenize
