@@ -5,16 +5,17 @@ from __future__ import absolute_import
 import json
 import argparse
 import os
+import sys
 
-from operator import itemgetter
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 from data_processing.utils import apply_over_generator
-from functools import partial
 
 
 def main():
     def restricted_int(x):
         x = int(x)
-        if x<1:
+        if x < 1:
             raise argparse.ArgumentTypeError("%r not in range [1,inf)" % (x,))
         return x
 
@@ -36,7 +37,7 @@ def main():
         default=5)
     args = parser.parse_args()
 
-    directory = os.path.dirname(args.clean_path)
+    directory = os.path.dirname(args.flattend_path)
     if not os.path.exists(directory):
         os.makedirs(directory)
 
@@ -46,16 +47,16 @@ def main():
         for sentence in lists:
             flattened += sentence
         review['text'] = flattened
-        json.dump(review, cleaned_file)
-        cleaned_file.write('\n')
+        json.dump(review, flattened_file)
+        flattened_file.write('\n')
         return acc + 1
 
-    with open(args.dirty_path, 'r') as dirty_file, open(args.clean_path, 'x+') as cleaned_file:
+    with open(args.nested_path, 'r') as nested_file, open(args.flattend_path, 'x+') as flattened_file:
         print("Beginning Filtering!")
-        num_reviews = sum(1 for _ in dirty_file)
+        num_reviews = sum(1 for _ in nested_file)
         print("There are %d reviews." % num_reviews)
-        dirty_file.seek(0)  # Reset stream position to start
-        reviews = (json.loads(line) for line in dirty_file)
+        nested_file.seek(0)  # Reset stream position to start
+        reviews = (json.loads(line) for line in nested_file)
 
         fn = flatten
         filtered_count = 0
@@ -63,8 +64,8 @@ def main():
             reviews, fn, acc=filtered_count, num_elements=num_reviews, progress_interval=args.progress_interval)
 
         # Count remaining reviews
-        cleaned_file.seek(0)
-        num_reviews = sum(1 for _ in cleaned_file)
+        flattened_file.seek(0)
+        num_reviews = sum(1 for _ in flattened_file)
         if filtered_count != num_reviews:
             print(("ERROR! The filtered review count was %d but the number of reviews in the file is %d. " +
                   "They should match! Something went wrong.") % (filtered_count, num_reviews))

@@ -5,10 +5,13 @@ from __future__ import absolute_import
 import json
 import argparse
 import os
+import sys
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from operator import itemgetter
-from data_processing.utils import apply_over_generator
 from functools import partial
+from data_processing.utils import apply_over_generator, restricted_float, restricted_int
 
 
 def review_parse(ratio, threshold, cleaned_file, review, acc):
@@ -26,22 +29,6 @@ def review_parse(ratio, threshold, cleaned_file, review, acc):
 
 
 def main():
-    def restricted_float(x):
-        """Constrcts a float. Throws exception if outside of [0,1].
-
-        From https://stackoverflow.com/questions/12116685/how-can-i-require-my-python-scripts-argument-to-be-a-float-between-0-0-1-0-usin
-        """
-        x = float(x)
-        if x < 0.0 or x > 1.0:
-            raise argparse.ArgumentTypeError("%r not in range [0.0, 1.0]" % (x,))
-        return x
-
-    def restricted_int(x):
-        x = int(x)
-        if x<1:
-            raise argparse.ArgumentTypeError("%r not in range [1,inf)" % (x,))
-        return x
-
     parser = argparse.ArgumentParser(
         description="Filters the reviews by proportion of highest compliment type to total, " +
                     "and by minimum compliments received.")

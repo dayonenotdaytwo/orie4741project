@@ -2,6 +2,7 @@ from __future__ import print_function
 from __future__ import division
 from __future__ import absolute_import
 
+import argparse
 from time import time
 
 
@@ -26,3 +27,20 @@ def apply_over_generator(generator, fn, acc=None, num_elements=None, progress_in
     if start_stop_info:
         print("Function application completed!")
     return acc
+
+
+def restricted_float(x):
+    """Constrcts a float. Throws exception if outside of [0,1].
+
+    From https://stackoverflow.com/questions/12116685/how-can-i-require-my-python-scripts-argument-to-be-a-float-between-0-0-1-0-usin
+    """
+    x = float(x)
+    if x < 0.0 or x > 1.0:
+        raise argparse.ArgumentTypeError("%r not in range [0.0, 1.0]" % (x,))
+    return x
+
+def restricted_int(x):
+    x = int(x)
+    if x<1:
+        raise argparse.ArgumentTypeError("%r not in range [1,inf)" % (x,))
+    return x

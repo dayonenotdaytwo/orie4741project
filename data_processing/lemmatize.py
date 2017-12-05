@@ -5,6 +5,9 @@ from __future__ import absolute_import
 import json
 import os
 import argparse
+import sys
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from nltk import pos_tag
 from nltk.tokenize import word_tokenize, sent_tokenize
@@ -113,13 +116,14 @@ def main():
 
     with open(args.dirty_path, 'r') as dirty_file, open(args.clean_path, 'x+') as cleaned_file:
         print("Beginning Cleaning!")
-        num_reviews = sum(1 for line in dirty_file)
+        num_reviews = sum(1 for _ in dirty_file)
         print("There are %d reviews." % num_reviews)
         dirty_file.seek(0)  # Reset stream position to start
         reviews = (json.loads(line) for line in dirty_file)
         fn = partial(clean_json, cleaned_file)
         filtered_count = 0
-        filtered_count = apply_over_generator(reviews, fn, filtered_count, num_reviews)
+        filtered_count = apply_over_generator(
+            reviews, fn, acc=filtered_count, num_elements=num_reviews, progress_interval=args.progress_interval)
 
         if filtered_count != num_reviews:
             print(("ERROR! The filtered review count was %d but the number of reviews in the file is %d. " +
