@@ -16,6 +16,8 @@ from functools import partial
 
 
 def put_in_matrix(vocab_list, dtm, review, row_num):
+    ctype = compliment_type_to_num(review['max_compliment_type'])
+    dtm[row_num, -1] = ctype
     for sentence in review['text']:
         for word in sentence:
             try:
@@ -68,7 +70,7 @@ def main():
         vocab_list = list(key for key, _ in vocab_dict.items())
         print("There are %d words in the vocabulary." % num_words)
 
-        dtm = np.zeros((num_reviews, args.top_n_words), dtype=np.int32)
+        dtm = np.zeros((num_reviews, args.top_n_words+1), dtype=np.int32)  # Add 1 for labels
         #dtm = np.memmap(args.dtm_path, dtype=np.int16, mode='w+', shape=(num_reviews, num_words))
 
         review_file.seek(0)  # Reset stream position to start

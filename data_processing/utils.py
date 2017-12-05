@@ -5,9 +5,17 @@ from __future__ import absolute_import
 import argparse
 from time import time
 
+USEFUL = 0
+FUNNY = 1
+COOL = 2
 
 UNKNOWN_TOKEN = '<UNKNOWN>'
 NUMERICAL_TOKEN = '<NUMBER>'
+
+
+def compliment_type_to_num(s):
+    return compliment_type_to_num.l.index(s)
+compliment_type_to_num.l = ('useful', 'funny', 'cool')
 
 
 def apply_over_generator(iterable, fn, acc=None, num_elements=None, progress_interval=5, start_stop_info=True):
