@@ -3,8 +3,8 @@ from __future__ import division
 from __future__ import absolute_import
 
 import sys
-import os.path as p
-sys.path.append(p.abspath(p.dirname(__file__) + '/../'))
+import os
+sys.path.insert(0, os.path.abspath(__file__ + "/../../"))
 
 import json
 import argparse

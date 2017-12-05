@@ -6,12 +6,25 @@ import argparse
 from time import time
 
 
-def apply_over_generator(generator, fn, acc=None, num_elements=None, progress_interval=5, start_stop_info=True):
+def apply_over_generator(iterable, fn, acc=None, num_elements=None, progress_interval=5, start_stop_info=True):
+    """Apply a function to the contents of an iterable. Can also print progress of application.
+
+    Args:
+        iterable:  An iterable to apply the function to.
+        fn:  The function to apply.
+        acc:  An accumulator variable for `fn`.
+        num_elements:  The number of elements in the iterable. If `None`, no progress can be printed.
+        progress_interval:  The interval in seconds to wait before printing updated progress.
+        start_stop_info:  Whether or not to print messages when starting and stopping the function application.
+
+    Returns:
+        The updated value of `acc`.
+    """
     if start_stop_info:
         print("Applying function...")
     last_time = time()
     last_i = 0
-    for i, review in enumerate(generator):
+    for i, review in enumerate(iterable):
         acc = fn(review, acc)
         if num_elements is not None:
             current_time = time()
@@ -38,6 +51,7 @@ def restricted_float(x):
     if x < 0.0 or x > 1.0:
         raise argparse.ArgumentTypeError("%r not in range [0.0, 1.0]" % (x,))
     return x
+
 
 def restricted_int(x):
     x = int(x)
