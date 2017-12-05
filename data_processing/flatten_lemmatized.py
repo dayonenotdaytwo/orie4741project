@@ -7,7 +7,7 @@ import argparse
 import os
 import sys
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+print(os.path.abspath(os.path.dirname(__file__) + '../'))
 
 from utils import apply_over_generator
 
@@ -36,6 +36,8 @@ def main():
         type=restricted_int,
         default=5)
     args = parser.parse_args()
+    flattened_path = args.flattened_path
+    nested_path = args.nested_path
 
     directory = os.path.dirname(args.flattend_path)
     if not os.path.exists(directory):
@@ -51,7 +53,7 @@ def main():
         flattened_file.write('\n')
         return acc + 1
 
-    with open(args.nested_path, 'r') as nested_file, open(args.flattend_path, 'x+') as flattened_file:
+    with open(nested_path, 'r') as nested_file, open(flattened_path, 'x+') as flattened_file:
         print("Beginning Filtering!")
         num_reviews = sum(1 for _ in nested_file)
         print("There are %d reviews." % num_reviews)
