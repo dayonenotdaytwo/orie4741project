@@ -36,6 +36,11 @@ def main():
         help="The progress printing interval in seconds",
         type=restricted_int,
         default=5)
+    parser.add_argument(
+        '--map_to_index',
+        help='Whether the text gets mapped to its index in the vocabulary or not',
+        default=False,
+        type=bool)
     args = parser.parse_args()
 
     directory = os.path.dirname(args.mapped_vocab_path)
@@ -62,12 +67,20 @@ def main():
 
         def map_word_to_vocab(word):
             if word.isnumeric():
-                return numerical_idx
+                if args.map_to_index:
+                    return numerical_idx
+                else:
+                    return NUMERICAL_TOKEN
             try:
-                idx = vocab_list.index(word)
+                if args.map_to_index:
+                    return vocab_list.index(word)
+                else:
+                    return word
             except ValueError:
-                idx = unknown_idx
-            return idx
+                if args.map_to_index:
+                    return unknown_idx
+                else:
+                    return UNKNOWN_TOKEN
 
         def map_to_vocab(review, acc):
             text = review['text']
