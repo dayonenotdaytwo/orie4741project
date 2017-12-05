@@ -39,7 +39,7 @@ def main():
     flattened_path = args.flattened_path
     nested_path = args.nested_path
 
-    directory = os.path.dirname(args.flattend_path)
+    directory = os.path.dirname(flattened_path)
     if not os.path.exists(directory):
         os.makedirs(directory)
 
