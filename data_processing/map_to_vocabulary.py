@@ -80,10 +80,9 @@ def main():
         apply_count = apply_over_generator(
             reviews, map_to_vocab, acc=apply_count, num_elements=num_reviews, progress_interval=args.progress_interval)
 
-        mapped_vocab_count = sum(1 for _ in review_file)
-        if apply_count != mapped_vocab_count or mapped_vocab_count != num_words:
-            print(("ERROR! The vocab mapper ran on %d reviews but the number of reviews in each file is %d, %d. " +
-                  "They should match! Something went wrong.") % (apply_count, mapped_vocab_count, num_reviews))
+        if apply_count != num_reviews:
+            print(("ERROR! The vocab mapper ran on %d reviews but the number of reviews in the file is %d. " +
+                  "They should match! Something went wrong.") % (apply_count, num_reviews))
             return -1
         print("Vocabulary mapping complete!")
 
