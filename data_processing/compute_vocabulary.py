@@ -74,12 +74,11 @@ def main():
             else:
                 word_count += 1
                 freq_dict[word] = freq
-        freq_dict[UNKOWN_TOKEN] = removed_count
+        freq_dict[UNKNOWN_TOKEN] = removed_count
         # Highest to lowest frequency
         sorted_dict = OrderedDict(sorted(freq_dict.items(), key=lambda kv: (kv[1], kv[0]), reverse=True))
         pickle.dump(sorted_dict, vocab_pickle)
-        print(sorted_dict)
-        print("There are %d words (not including %s), after removing %d." % (word_count, UNKOWN_TOKEN, removed_count))
+        print("There are %d words (not including %s), after removing %d." % (word_count, UNKNOWN_TOKEN, removed_count))
         print("Counting complete!")
 
 

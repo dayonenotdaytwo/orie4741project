@@ -6,7 +6,7 @@ import argparse
 from time import time
 
 
-UNKOWN_TOKEN = '<UNKNOWN>'
+UNKNOWN_TOKEN = '<UNKNOWN>'
 NUMERICAL_TOKEN = '<NUMBER>'
 
 
